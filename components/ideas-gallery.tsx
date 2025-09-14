@@ -53,7 +53,7 @@ export function IdeasGallery() {
   }
 
   const handleVote = async (ideaId: number) => {
-    if (votedIdeas.has(ideaId) || votingIdeas.has(ideaId)) return
+    if (votingIdeas.has(ideaId)) return
 
     setVotingIdeas((prev) => new Set([...prev, ideaId]))
 
@@ -69,19 +69,9 @@ export function IdeasGallery() {
       if (response.ok) {
         // Update local state
         setIdeas((prev) => prev.map((idea) => (idea.id === ideaId ? { ...idea, vote_count: data.newVoteCount } : idea)))
-        setVotedIdeas((prev) => {
-          const newSet = new Set([...prev, ideaId])
-          localStorage.setItem("votedIdeas", JSON.stringify([...newSet]))
-          return newSet
-        })
         toast.success("Vote recorded!")
       } else {
-        if (response.status === 409) {
-          toast.error("You've already voted for this idea")
-          setVotedIdeas((prev) => new Set([...prev, ideaId]))
-        } else {
-          toast.error(data.error || "Failed to vote")
-        }
+        toast.error(data.error || "Failed to vote")
       }
     } catch (error) {
       console.error("Error voting:", error)
@@ -126,7 +116,6 @@ export function IdeasGallery() {
 
       <div className="space-y-3 max-h-96 overflow-y-auto">
         {ideas.map((idea) => {
-          const isVoted = votedIdeas.has(idea.id)
           const isVoting = votingIdeas.has(idea.id)
 
           return (
@@ -139,16 +128,10 @@ export function IdeasGallery() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleVote(idea.id)}
-                      disabled={isVoted || isVoting}
-                      className={`flex items-center gap-1 text-xs transition-colors ${
-                        isVoted ? "text-red-500" : "hover:text-red-500"
-                      }`}
+                      disabled={isVoting}
+                      className="flex items-center gap-1 text-xs transition-colors hover:text-red-500"
                     >
-                      {isVoting ? (
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <Heart className={`h-3 w-3 ${isVoted ? "fill-red-500 text-red-500" : ""}`} />
-                      )}
+                      {isVoting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Heart className="h-3 w-3" />}
                       {idea.vote_count}
                     </Button>
                   </div>

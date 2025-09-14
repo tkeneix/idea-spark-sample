@@ -4,9 +4,11 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Heart, User, Clock, Layers, Cpu, Loader2 } from "lucide-react"
+import { ArrowLeft, Heart, User, Clock, Layers, Cpu, Loader2, Sparkles } from "lucide-react"
 import Link from "next/link"
-import { toast } from "sonner"
+import { ElevatorPitchGenerator } from "@/components/elevator-pitch-generator"
+import { LeanCanvasAnalyzer } from "@/components/lean-canvas-analyzer"
+import { AIBrainstormingChat } from "@/components/ai-brainstorming-chat"
 
 interface IdeaDetail {
   id: number
@@ -25,15 +27,20 @@ interface IdeaDetail {
   }>
 }
 
+const showToast = (message: string, type: "success" | "error" = "success") => {
+  alert(message)
+}
+
 export default function IdeaDetailPage({ params }: { params: { id: string } }) {
   const [idea, setIdea] = useState<IdeaDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [isVoting, setIsVoting] = useState(false)
   const [votedIdeas, setVotedIdeas] = useState<Set<number>>(new Set())
+  const [showAIEnhancement, setShowAIEnhancement] = useState(false)
+  const [chatContext, setChatContext] = useState<string>("")
 
   useEffect(() => {
     fetchIdea()
-    // Load voted ideas from localStorage
     const stored = localStorage.getItem("votedIdeas")
     if (stored) {
       setVotedIdeas(new Set(JSON.parse(stored)))
@@ -47,7 +54,6 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
         const data = await response.json()
         setIdea(data.idea)
       } else if (response.status === 404) {
-        // Handle not found
         setIdea(null)
       }
     } catch (error) {
@@ -78,21 +84,25 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
           localStorage.setItem("votedIdeas", JSON.stringify([...newSet]))
           return newSet
         })
-        toast.success("Vote recorded!")
+        showToast("Vote recorded!")
       } else {
         if (response.status === 409) {
-          toast.error("You've already voted for this idea")
+          showToast("You've already voted for this idea", "error")
           setVotedIdeas((prev) => new Set([...prev, idea.id]))
         } else {
-          toast.error(data.error || "Failed to vote")
+          showToast(data.error || "Failed to vote", "error")
         }
       }
     } catch (error) {
       console.error("Error voting:", error)
-      toast.error("Failed to vote")
+      showToast("Failed to vote", "error")
     } finally {
       setIsVoting(false)
     }
+  }
+
+  const handleChatContextGenerated = (context: string) => {
+    setChatContext(context)
   }
 
   if (loading) {
@@ -188,6 +198,55 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
               </Button>
             </div>
 
+            {/* Selected Themes & Technologies */}
+            {(idea.themes.length > 0 || idea.technologies.length > 0) && (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Selected Themes & Technologies
+                  </h3>
+                  <div className="space-y-3">
+                    {idea.themes.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground mb-2">Business Themes:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {idea.themes.map((theme) => (
+                            <Badge key={theme.id} variant="secondary" className="text-sm">
+                              {theme.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {idea.technologies.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground mb-2">Technologies:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {idea.technologies.map((tech) => (
+                            <Badge key={tech.id} variant="outline" className="text-sm">
+                              {tech.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  {/* AI Enhancement Button */}
+                  <div className="mt-4 pt-4 border-t border-primary/20">
+                    <Button
+                      onClick={() => setShowAIEnhancement(!showAIEnhancement)}
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      {showAIEnhancement ? "Hide" : "Show"} AI Enhancement
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Content */}
             <Card>
               <CardContent className="p-6">
@@ -198,6 +257,90 @@ export default function IdeaDetailPage({ params }: { params: { id: string } }) {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Lean Canvas Analysis Section */}
+            <LeanCanvasAnalyzer
+              ideaTitle={idea.title}
+              ideaContent={idea.content}
+              selectedThemes={idea.themes.map((t) => t.name)}
+              selectedTechnologies={idea.technologies.map((t) => t.name)}
+            />
+
+            {/* AI Brainstorming Chat Section */}
+            <AIBrainstormingChat
+              ideaTitle={idea.title}
+              ideaContent={idea.content}
+              selectedThemes={idea.themes.map((t) => t.name)}
+              selectedTechnologies={idea.technologies.map((t) => t.name)}
+              onContextGenerated={handleChatContextGenerated}
+              isIdeaFirst={idea.themes.length > 0}
+            />
+
+            {/* AI Enhancement Section */}
+            {showAIEnhancement && (
+              <Card className="border-primary/30">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    AI Idea Enhancement
+                  </h3>
+
+                  {chatContext && (
+                    <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <h4 className="font-medium text-sm mb-2 text-blue-800">チャットから生成されたコンテキスト:</h4>
+                      <div className="text-xs text-blue-700 bg-white p-3 rounded border max-h-32 overflow-y-auto">
+                        <pre className="whitespace-pre-wrap">{chatContext}</pre>
+                      </div>
+                    </div>
+                  )}
+
+                  {(idea.themes.length > 0 || idea.technologies.length > 0) && (
+                    <div className="mb-6 p-4 bg-muted/50 rounded-lg border">
+                      <h4 className="font-medium text-sm mb-3 text-muted-foreground">Selected for AI Enhancement:</h4>
+                      <div className="space-y-2">
+                        {idea.themes.length > 0 && (
+                          <div>
+                            <span className="text-xs font-medium text-muted-foreground">Business Themes: </span>
+                            <div className="inline-flex flex-wrap gap-1 mt-1">
+                              {idea.themes.map((theme) => (
+                                <Badge key={theme.id} variant="secondary" className="text-xs">
+                                  {theme.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {idea.technologies.length > 0 && (
+                          <div>
+                            <span className="text-xs font-medium text-muted-foreground">Technologies: </span>
+                            <div className="inline-flex flex-wrap gap-1 mt-1">
+                              {idea.technologies.map((tech) => (
+                                <Badge key={tech.id} variant="outline" className="text-xs">
+                                  {tech.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <p className="text-sm text-muted-foreground mb-6">
+                    選択したテーマに基づいて、エレベーターピッチと強化されたコンテンツを生成します。
+                  </p>
+                  <ElevatorPitchGenerator
+                    selectedThemes={idea.themes.map((t) => t.name)}
+                    selectedTechnologies={idea.technologies.map((t) => t.name)}
+                    existingIdea={{
+                      title: idea.title,
+                      content: idea.content,
+                    }}
+                    additionalContext={chatContext}
+                  />
+                </CardContent>
+              </Card>
+            )}
 
             {/* Themes and Technologies */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

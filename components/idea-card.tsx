@@ -32,7 +32,7 @@ export function IdeaCard({ idea, votedIdeas, onVote }: IdeaCardProps) {
     e.preventDefault() // Prevent navigation when clicking vote button
     e.stopPropagation()
 
-    if (isVoted || isVoting) return
+    if (isVoting) return
 
     setIsVoting(true)
 
@@ -49,11 +49,7 @@ export function IdeaCard({ idea, votedIdeas, onVote }: IdeaCardProps) {
         onVote(idea.id, data.newVoteCount)
         toast.success("Vote recorded!")
       } else {
-        if (response.status === 409) {
-          toast.error("You've already voted for this idea")
-        } else {
-          toast.error(data.error || "Failed to vote")
-        }
+        toast.error(data.error || "Failed to vote")
       }
     } catch (error) {
       console.error("Error voting:", error)
@@ -77,16 +73,10 @@ export function IdeaCard({ idea, votedIdeas, onVote }: IdeaCardProps) {
                 variant="ghost"
                 size="sm"
                 onClick={handleVote}
-                disabled={isVoted || isVoting}
-                className={`flex items-center gap-1 text-sm transition-colors shrink-0 ${
-                  isVoted ? "text-red-500" : "hover:text-red-500"
-                }`}
+                disabled={isVoting}
+                className={`flex items-center gap-1 text-sm transition-colors shrink-0 hover:text-red-500`}
               >
-                {isVoting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Heart className={`h-4 w-4 ${isVoted ? "fill-red-500 text-red-500" : ""}`} />
-                )}
+                {isVoting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Heart className="h-4 w-4" />}
                 {idea.vote_count}
               </Button>
             </div>

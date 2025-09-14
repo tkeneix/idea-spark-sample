@@ -1,124 +1,66 @@
 "use client"
 
 import { useState } from "react"
-import { ThemeSelector } from "@/components/theme-selector"
-import { IdeaForm } from "@/components/idea-form"
-import { IdeasGallery } from "@/components/ideas-gallery"
+import { PathSelector } from "@/components/path-selector"
+import { IdeaFirstFlow } from "@/components/idea-first-flow"
+import { TechnologyFirstFlow } from "@/components/technology-first-flow"
 import { Button } from "@/components/ui/button"
-import { createClient } from "@/lib/supabase/client"
-import { toast } from "sonner"
-import { Trophy, Settings, Compass } from "lucide-react"
+import { Settings } from "lucide-react"
 import Link from "next/link"
 
-type Step = "themes" | "form"
+type Path = "select" | "idea-first" | "technology-first"
 
 export default function HomePage() {
-  const [currentStep, setCurrentStep] = useState<Step>("themes")
-  const [selectedThemes, setSelectedThemes] = useState<number[]>([])
+  const [currentPath, setCurrentPath] = useState<Path>("select")
 
-  const handleThemeToggle = (themeId: number) => {
-    setSelectedThemes((prev) => (prev.includes(themeId) ? prev.filter((id) => id !== themeId) : [...prev, themeId]))
+  const handlePathSelect = (path: "idea-first" | "technology-first") => {
+    setCurrentPath(path)
   }
 
-  const handleContinue = () => {
-    setCurrentStep("form")
-  }
-
-  const handleBack = () => {
-    setCurrentStep("themes")
-  }
-
-  const handleSaveIdea = async (idea: { title: string; content: string; username: string }) => {
-    const supabase = createClient()
-
-    try {
-      const { data, error } = await supabase
-        .from("business_ideas")
-        .insert({
-          title: idea.title,
-          content: idea.content,
-          username: idea.username,
-          vote_count: 0,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-
-      // Link themes to the idea
-      if (selectedThemes.length > 0) {
-        const themeLinks = selectedThemes.map((themeId) => ({
-          idea_id: data.id,
-          theme_id: themeId,
-        }))
-
-        const { error: linkError } = await supabase.from("idea_themes").insert(themeLinks)
-
-        if (linkError) throw linkError
-      }
-
-      toast.success("Business idea saved successfully!")
-
-      // Reset form
-      setCurrentStep("themes")
-      setSelectedThemes([])
-    } catch (error) {
-      console.error("Error saving idea:", error)
-      toast.error("Failed to save business idea. Please try again.")
-    }
+  const handleBackToPathSelect = () => {
+    setCurrentPath("select")
   }
 
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            <div className="mb-8 text-center">
-              <div className="flex items-center justify-center gap-4 mb-4">
-                <h1 className="text-4xl font-bold text-foreground text-balance">Tane Lab</h1>
-                <div className="flex gap-2">
-                  <Link href="/discover">
-                    <Button variant="outline" size="sm" className="flex items-center gap-2 bg-transparent">
-                      <Compass className="h-4 w-4" />
-                      Discover
-                    </Button>
-                  </Link>
-                  <Link href="/leaderboard">
-                    <Button variant="outline" size="sm" className="flex items-center gap-2 bg-transparent">
-                      <Trophy className="h-4 w-4" />
-                      Leaderboard
-                    </Button>
-                  </Link>
-                  <Link href="/admin">
-                    <Button variant="outline" size="sm" className="flex items-center gap-2 bg-transparent">
-                      <Settings className="h-4 w-4" />
-                      Admin
-                    </Button>
-                  </Link>
-                </div>
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8 text-center">
+            <div className="mb-4 relative">
+              <h1 className="text-4xl font-bold text-foreground text-balance text-center">
+                スタートアップスタジオの事業アイディア創出支援サービス（開発中）
+              </h1>
+              <div className="absolute top-0 right-0">
+                <Link href="/admin">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2 bg-transparent">
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
-              <p className="text-lg text-muted-foreground text-pretty">
-                AI-powered business creation service for startup studio applications
-              </p>
             </div>
-
-            {currentStep === "themes" && (
-              <ThemeSelector
-                selectedThemes={selectedThemes}
-                onThemeToggle={handleThemeToggle}
-                onContinue={handleContinue}
-              />
-            )}
-
-            {currentStep === "form" && (
-              <IdeaForm selectedThemes={selectedThemes} onBack={handleBack} onSave={handleSaveIdea} />
-            )}
           </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <IdeasGallery />
+          {currentPath === "select" && <PathSelector onPathSelect={handlePathSelect} />}
+
+          {currentPath === "idea-first" && <IdeaFirstFlow onBack={handleBackToPathSelect} />}
+
+          {currentPath === "technology-first" && <TechnologyFirstFlow onBack={handleBackToPathSelect} />}
+        </div>
+
+        {/* Leaderboard Link Section */}
+        <div className="mt-16 text-center">
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8">
+            <h2 className="text-2xl font-bold text-blue-900 mb-4">
+              🏆 みんなのアイディアランキング
+            </h2>
+            <p className="text-blue-700 mb-6">
+              他のユーザーが投稿したアイディアをチェック！人気のアイディアを見つけよう
+            </p>
+            <Link href="/leaderboard">
+              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-lg text-lg shadow-lg transform hover:scale-105 transition-all duration-200">
+                ランキングを見る
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

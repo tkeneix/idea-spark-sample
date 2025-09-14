@@ -15,18 +15,6 @@ export async function POST(request: NextRequest) {
     const forwarded = request.headers.get("x-forwarded-for")
     const ip = forwarded ? forwarded.split(",")[0] : request.headers.get("x-real-ip") || "anonymous"
 
-    // Check if this IP has already voted for this idea
-    const { data: existingVote } = await supabase
-      .from("votes")
-      .select("id")
-      .eq("idea_id", ideaId)
-      .eq("voter_ip", ip)
-      .single()
-
-    if (existingVote) {
-      return NextResponse.json({ error: "You have already voted for this idea" }, { status: 409 })
-    }
-
     // Add vote record
     const { error: voteError } = await supabase.from("votes").insert({
       idea_id: ideaId,
