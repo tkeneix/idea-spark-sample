@@ -55,7 +55,7 @@ export function AIBrainstormingChat({
   }
 
   useEffect(() => {
-    scrollToBottom()
+    //scrollToBottom()
   }, [messages])
 
   useEffect(() => {
@@ -217,12 +217,6 @@ export function AIBrainstormingChat({
 
     if (onContextGenerated) {
       onContextGenerated(context)
-      setTimeout(() => {
-        const aiIdeaSupportButton = document.querySelector("[data-ai-idea-support]")
-        if (aiIdeaSupportButton) {
-          aiIdeaSupportButton.scrollIntoView({ behavior: "smooth", block: "center" })
-        }
-      }, 100)
     }
   }
 
@@ -271,11 +265,11 @@ export function AIBrainstormingChat({
 
   const fetchBusinessThemes = async () => {
     try {
-      const { createClient } = await import("@/lib/supabase/client")
-      const supabase = createClient()
-      const { data: themes } = await supabase.from("business_themes").select("name").order("name")
+      const response = await fetch('/api/admin/themes')
+      if (!response.ok) throw new Error('Failed to fetch themes')
 
-      setBusinessThemes(themes?.map((theme) => theme.name) || [])
+      const { themes } = await response.json()
+      setBusinessThemes(themes?.map((theme: any) => theme.name) || [])
     } catch (error) {
       console.error("Error fetching business themes:", error)
     }
@@ -428,7 +422,7 @@ export function AIBrainstormingChat({
 
       <CardContent className="space-y-4">
         {/* Chat Messages */}
-        <div className="h-96 overflow-y-auto space-y-3 p-4 bg-white/30 rounded-lg border border-blue-100">
+        <div className="min-h-64 h-[400px] overflow-y-auto space-y-3 p-4 bg-white/30 rounded-lg border border-blue-100">
           {messages.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -442,15 +436,14 @@ export function AIBrainstormingChat({
                 className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] p-3 rounded-lg relative group ${
-                    message.role === "user"
-                      ? "bg-blue-600 text-white cursor-default"
-                      : message.content.includes("よくある質問:")
-                        ? "bg-purple-50 border border-purple-200"
-                        : message.content.includes("次の質問候補:")
-                          ? "bg-green-50 border border-green-200"
-                          : "bg-white border border-gray-200 cursor-default"
-                  } ${message.selected ? "ring-2 ring-blue-400" : ""}`}
+                  className={`max-w-[80%] p-3 rounded-lg relative group ${message.role === "user"
+                    ? "bg-blue-600 text-white cursor-default"
+                    : message.content.includes("よくある質問:")
+                      ? "bg-purple-50 border border-purple-200"
+                      : message.content.includes("次の質問候補:")
+                        ? "bg-green-50 border border-green-200"
+                        : "bg-white border border-gray-200 cursor-default"
+                    } ${message.selected ? "ring-2 ring-blue-400" : ""}`}
                 >
                   {selectMode &&
                     !(message.content.includes("よくある質問:") || message.content.includes("次の質問候補:")) && (
@@ -473,15 +466,14 @@ export function AIBrainstormingChat({
                   {renderQuestionButtons(message.content, message.id)}
 
                   <div
-                    className={`text-xs mt-1 opacity-70 ${
-                      message.role === "user"
-                        ? "text-blue-100"
-                        : message.content.includes("よくある質問:")
-                          ? "text-purple-600"
-                          : message.content.includes("次の質問候補:")
-                            ? "text-green-600"
-                            : "text-gray-500"
-                    }`}
+                    className={`text-xs mt-1 opacity-70 ${message.role === "user"
+                      ? "text-blue-100"
+                      : message.content.includes("よくある質問:")
+                        ? "text-purple-600"
+                        : message.content.includes("次の質問候補:")
+                          ? "text-green-600"
+                          : "text-gray-500"
+                      }`}
                   >
                     {message.timestamp.toLocaleTimeString()}
                   </div>
@@ -511,7 +503,7 @@ export function AIBrainstormingChat({
         {messages.length > 0 && (
           <div className="flex items-center gap-2 p-3 bg-white/50 rounded-lg border border-blue-100">
             <Button variant="outline" size="sm" onClick={() => setSelectMode(!selectMode)} className="text-xs">
-              メッセージ選択
+              コンテキストに追加
             </Button>
 
             {selectMode && (

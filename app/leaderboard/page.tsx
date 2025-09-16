@@ -11,12 +11,12 @@ export default function LeaderboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">みんなのアイディアランキング</h1>
-              <p className="text-muted-foreground">Top-rated business ideas from the community</p>
+              <p className="text-muted-foreground">Heartの多い順</p>
             </div>
             <Link href="/">
               <Button variant="outline" className="flex items-center gap-2 bg-transparent">
                 <ArrowLeft className="h-4 w-4" />
-                Back to Ideas
+                Topへ戻る
               </Button>
             </Link>
           </div>

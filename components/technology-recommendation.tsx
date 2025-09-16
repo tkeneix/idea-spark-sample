@@ -72,7 +72,7 @@ export function TechnologyRecommendation({ ideaData, onContinue }: TechnologyRec
     }
   }
 
-  const toggleTechnology = (id: number) => {
+  const toggleTechnology = (id: string) => {
     setSelectedTechnologies((prev) => (prev.includes(id) ? prev.filter((techId) => techId !== id) : [...prev, id]))
   }
 

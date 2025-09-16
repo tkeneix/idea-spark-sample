@@ -9,12 +9,11 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Sparkles, Save, Copy, Loader2, CheckCircle } from "lucide-react"
 import { toast } from "sonner"
-import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 
 interface ElevatorPitchGeneratorProps {
-  selectedThemes: number[]
-  selectedTechnologies: number[]
+  selectedThemes: string[]
+  selectedTechnologies: string[]
   existingIdea: { title: string; content: string } | null
   additionalContext?: string
 }
@@ -46,17 +45,27 @@ export function ElevatorPitchGenerator({
   }, [additionalContext, existingIdea])
 
   const fetchThemeAndTechnologyNames = async () => {
-    const supabase = createClient()
-
     try {
       if (selectedThemes.length > 0) {
-        const { data: themes } = await supabase.from("business_themes").select("name").in("id", selectedThemes)
-        setThemeNames(themes?.map((theme) => theme.name) || [])
+        const response = await fetch("/api/admin/themes")
+        if (response.ok) {
+          const data = await response.json()
+          const selectedThemeNames = data.themes
+            ?.filter((theme: any) => selectedThemes.includes(theme.id))
+            ?.map((theme: any) => theme.name) || []
+          setThemeNames(selectedThemeNames)
+        }
       }
 
       if (selectedTechnologies.length > 0) {
-        const { data: technologies } = await supabase.from("technologies").select("name").in("id", selectedTechnologies)
-        setTechnologyNames(technologies?.map((tech) => tech.name) || [])
+        const response = await fetch("/api/admin/technologies")
+        if (response.ok) {
+          const data = await response.json()
+          const selectedTechNames = data.technologies
+            ?.filter((tech: any) => selectedTechnologies.includes(tech.id))
+            ?.map((tech: any) => tech.name) || []
+          setTechnologyNames(selectedTechNames)
+        }
       }
     } catch (error) {
       console.error("Error fetching theme/technology names:", error)
@@ -132,50 +141,36 @@ export function ElevatorPitchGenerator({
     if (!username || !elevatorPitch || !existingIdea) return
 
     setIsSaving(true)
-    const supabase = createClient()
 
     try {
       console.log("[v0] Starting idea save process")
 
-      const { data, error } = await supabase
-        .from("business_ideas")
-        .insert({
+      const response = await fetch("/api/ideas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           title: existingIdea.title,
           content: `${existingIdea.content}\n\n【エレベーターピッチ】\n${elevatorPitch}`,
           username,
-          vote_count: 0,
-        })
-        .select()
-        .single()
+          themeIds: selectedThemes.map(String),
+          technologyIds: selectedTechnologies.map(String),
+        }),
+      })
 
-      if (error) throw error
-
-      console.log("[v0] Idea saved successfully:", data.id)
-
-      if (selectedThemes.length > 0) {
-        const themeLinks = selectedThemes.map((themeId) => ({
-          idea_id: data.id,
-          theme_id: themeId,
-        }))
-        await supabase.from("idea_themes").insert(themeLinks)
-        console.log("[v0] Theme links saved")
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Failed to save idea")
       }
 
-      if (selectedTechnologies.length > 0) {
-        const techLinks = selectedTechnologies.map((techId) => ({
-          idea_id: data.id,
-          technology_id: techId,
-        }))
-        await supabase.from("idea_technologies").insert(techLinks)
-        console.log("[v0] Technology links saved")
-      }
+      const data = await response.json()
+      console.log("[v0] Idea saved successfully:", data.idea.id)
 
       toast.success("事業アイデアが保存されました！")
       console.log("[v0] Toast notification triggered")
 
       // Wait 1.5 seconds before redirecting to ensure toast is visible
       setTimeout(() => {
-        router.push("/leaderboard")
+        router.push("/")
       }, 1500)
     } catch (error) {
       console.error("Error saving idea:", error)

@@ -28,7 +28,7 @@ export default function HomePage() {
           <div className="mb-8 text-center">
             <div className="mb-4 relative">
               <h1 className="text-4xl font-bold text-foreground text-balance text-center">
-                スタートアップスタジオの事業アイディア創出支援サービス（開発中）
+                スタートアップスタジオの<br />事業アイディア創出支援サービス（開発中）
               </h1>
               <div className="absolute top-0 right-0">
                 <Link href="/admin">
@@ -45,24 +45,26 @@ export default function HomePage() {
           {currentPath === "idea-first" && <IdeaFirstFlow onBack={handleBackToPathSelect} />}
 
           {currentPath === "technology-first" && <TechnologyFirstFlow onBack={handleBackToPathSelect} />}
-        </div>
 
-        {/* Leaderboard Link Section */}
-        <div className="mt-16 text-center">
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8">
-            <h2 className="text-2xl font-bold text-blue-900 mb-4">
-              🏆 みんなのアイディアランキング
-            </h2>
-            <p className="text-blue-700 mb-6">
-              他のユーザーが投稿したアイディアをチェック！人気のアイディアを見つけよう
-            </p>
-            <Link href="/leaderboard">
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-lg text-lg shadow-lg transform hover:scale-105 transition-all duration-200">
-                ランキングを見る
-              </Button>
-            </Link>
-          </div>
         </div>
+        {/* Leaderboard Link Section - Only show on path selection screen */}
+        {currentPath === "select" && (
+          <div className="mt-16 text-center">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8">
+              <h2 className="text-2xl font-bold text-blue-900 mb-4">
+                🏆 みんなのアイディアランキング
+              </h2>
+              <p className="text-blue-700 mb-6">
+                他のユーザーが投稿したアイディアをチェック！人気のアイディアを見つけよう
+              </p>
+              <Link href="/leaderboard">
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-8 py-3 rounded-lg text-lg shadow-lg transform hover:scale-105 transition-all duration-200">
+                  ランキングを見る
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

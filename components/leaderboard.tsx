@@ -115,7 +115,6 @@ export function Leaderboard({ limit = 10, showTimeframes = true }: LeaderboardPr
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
-            みんなのアイディアランキング
           </CardTitle>
           {showTimeframes && (
             <div className="flex gap-2">
@@ -142,9 +141,8 @@ export function Leaderboard({ limit = 10, showTimeframes = true }: LeaderboardPr
                 <div
                   key={idea.id}
                   onClick={() => handleIdeaClick(idea.id)}
-                  className={`flex items-start gap-3 p-3 rounded-lg transition-colors cursor-pointer hover:bg-muted/50 ${
-                    index < 3 ? "bg-accent/10 border border-accent/20" : "bg-muted/30"
-                  }`}
+                  className={`flex items-start gap-3 p-3 rounded-lg transition-colors cursor-pointer hover:bg-muted/50 ${index < 3 ? "bg-accent/10 border border-accent/20" : "bg-muted/30"
+                    }`}
                 >
                   <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background">
                     {getRankIcon(index)}

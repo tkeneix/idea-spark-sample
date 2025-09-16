@@ -40,6 +40,7 @@
     "@radix-ui/react-tooltip": "1.1.6",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
+    "@types/pg": "^8.11.10",
     "@vercel/analytics": "latest",
     "ai": "latest",
     "autoprefixer": "^10.4.20",
@@ -53,17 +54,19 @@
     "lucide-react": "^0.454.0",
     "next": "14.2.16",
     "next-themes": "latest",
+    "pg": "^8.13.1",
     "react": "^18",
     "react-day-picker": "9.8.0",
     "react-dom": "^18",
     "react-hook-form": "^7.60.0",
+    "react-is": "^19.1.1",
     "react-resizable-panels": "^2.1.7",
     "recharts": "latest",
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
-    "zod": "3.25.67"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",

@@ -16,23 +16,29 @@ interface TechnologyFirstFlowProps {
 
 export function TechnologyFirstFlow({ onBack }: TechnologyFirstFlowProps) {
   const [currentStep, setCurrentStep] = useState<Step>("technologies")
-  const [selectedTechnologies, setSelectedTechnologies] = useState<number[]>([])
+  const [selectedTechnologies, setSelectedTechnologies] = useState<string[]>([])
   const [ideaData, setIdeaData] = useState<{ title: string; content: string }>({ title: "", content: "" })
-  const [selectedThemes, setSelectedThemes] = useState<number[]>([])
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([])
 
-  const handleTechnologySelection = (technologies: number[]) => {
+  const handleTechnologySelection = (technologies: string[]) => {
     setSelectedTechnologies(technologies)
     setCurrentStep("idea")
+    // Scroll to top when navigating to next step
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleApplicationGeneration = (data: { title: string; content: string }) => {
     setIdeaData(data)
     setCurrentStep("business")
+    // Scroll to top when navigating to next step
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleBusinessSelection = (themes: number[]) => {
+  const handleBusinessSelection = (themes: string[]) => {
     setSelectedThemes(themes)
     setCurrentStep("pitch")
+    // Scroll to top when navigating to next step
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleBackToPath = () => {
@@ -45,6 +51,8 @@ export function TechnologyFirstFlow({ onBack }: TechnologyFirstFlowProps) {
     } else if (currentStep === "pitch") {
       setCurrentStep("business")
     }
+    // Scroll to top when navigating back
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (

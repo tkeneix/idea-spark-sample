@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { createServerClient } from "@/lib/supabase/server"
+import { Database } from "@/lib/database"
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,17 +17,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "AI機能が利用できません" }, { status: 500 })
     }
 
-    const supabase = await createServerClient()
-    const { data: techData, error: techError } = await supabase
-      .from("technologies")
-      .select("name")
-      .in("id", technologies)
-
-    if (techError) {
-      console.error("[v0] Database error:", techError)
-      return NextResponse.json({ error: "技術情報の取得に失敗しました" }, { status: 500 })
-    }
-
+    const techData = await Database.getTechnologiesByIds(technologies)
     const techNames = techData?.map((t) => t.name).join(", ") || "選択された技術"
 
     const contextSection = additionalContext

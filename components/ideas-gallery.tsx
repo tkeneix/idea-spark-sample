@@ -34,17 +34,12 @@ export function IdeasGallery() {
   }, [])
 
   const fetchIdeas = async () => {
-    const supabase = createClient()
-
     try {
-      const { data, error } = await supabase
-        .from("business_ideas")
-        .select("*")
-        .order("vote_count", { ascending: false })
-        .limit(10)
-
-      if (error) throw error
-      setIdeas(data || [])
+      const response = await fetch('/api/ideas?limit=10&sortBy=popular')
+      const data = await response.json()
+      
+      if (!response.ok) throw new Error('Failed to fetch ideas')
+      setIdeas(data.ideas || [])
     } catch (error) {
       console.error("Error fetching ideas:", error)
     } finally {
