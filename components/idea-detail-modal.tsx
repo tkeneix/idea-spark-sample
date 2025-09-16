@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Heart, Clock, User, Loader2 } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
 import { toast } from "sonner"
 
 interface IdeaDetailModalProps {
@@ -34,7 +33,6 @@ export function IdeaDetailModal({ ideaId, isOpen, onClose }: IdeaDetailModalProp
   useEffect(() => {
     if (ideaId && isOpen) {
       fetchIdeaDetail()
-      checkVoteStatus()
     }
   }, [ideaId, isOpen])
 
@@ -42,35 +40,16 @@ export function IdeaDetailModal({ ideaId, isOpen, onClose }: IdeaDetailModalProp
     if (!ideaId) return
 
     setLoading(true)
-    const supabase = createClient()
 
     try {
-      // Fetch idea with themes and technologies
-      const { data: ideaData, error: ideaError } = await supabase
-        .from("business_ideas")
-        .select("*")
-        .eq("id", ideaId)
-        .single()
+      const response = await fetch(`/api/ideas/${ideaId}`)
+      
+      if (!response.ok) {
+        throw new Error("Failed to fetch idea")
+      }
 
-      if (ideaError) throw ideaError
-
-      // Fetch associated themes
-      const { data: themeData } = await supabase
-        .from("idea_themes")
-        .select("business_themes(id, name)")
-        .eq("idea_id", ideaId)
-
-      // Fetch associated technologies
-      const { data: techData } = await supabase
-        .from("idea_technologies")
-        .select("technologies(id, name)")
-        .eq("idea_id", ideaId)
-
-      setIdea({
-        ...ideaData,
-        themes: themeData?.map((item) => item.business_themes).filter(Boolean) || [],
-        technologies: techData?.map((item) => item.technologies).filter(Boolean) || [],
-      })
+      const data = await response.json()
+      setIdea(data.idea)
     } catch (error) {
       console.error("Error fetching idea detail:", error)
       toast.error("アイデアの詳細を取得できませんでした")
@@ -86,7 +65,7 @@ export function IdeaDetailModal({ ideaId, isOpen, onClose }: IdeaDetailModalProp
   }
 
   const handleVote = async () => {
-    if (!idea || hasVoted || voting) return
+    if (!idea || voting) return
 
     setVoting(true)
     try {
@@ -100,12 +79,6 @@ export function IdeaDetailModal({ ideaId, isOpen, onClose }: IdeaDetailModalProp
 
       if (response.ok) {
         setIdea((prev) => (prev ? { ...prev, vote_count: data.newVoteCount } : null))
-        setHasVoted(true)
-
-        // Update localStorage
-        const votedIdeas = JSON.parse(localStorage.getItem("votedIdeas") || "[]")
-        votedIdeas.push(idea.id)
-        localStorage.setItem("votedIdeas", JSON.stringify(votedIdeas))
 
         toast.success("投票しました！")
       } else {
@@ -121,7 +94,7 @@ export function IdeaDetailModal({ ideaId, isOpen, onClose }: IdeaDetailModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl sm:max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>事業アイデア詳細</DialogTitle>
         </DialogHeader>
@@ -138,14 +111,14 @@ export function IdeaDetailModal({ ideaId, isOpen, onClose }: IdeaDetailModalProp
               <h2 className="text-2xl font-bold text-foreground text-balance">{idea.title}</h2>
               <Button
                 onClick={handleVote}
-                disabled={hasVoted || voting}
-                variant={hasVoted ? "default" : "outline"}
+                disabled={voting}
+                variant="outline"
                 className="flex items-center gap-2 shrink-0"
               >
                 {voting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Heart className={`h-4 w-4 ${hasVoted ? "fill-current" : ""}`} />
+                  <Heart className="h-4 w-4" />
                 )}
                 {idea.vote_count}
               </Button>

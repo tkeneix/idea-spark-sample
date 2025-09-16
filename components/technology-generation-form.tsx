@@ -34,10 +34,14 @@ export function TechnologyGenerationForm({ selectedTechnologies, onContinue }: T
     if (selectedTechnologies.length === 0) return
 
     try {
-      const supabase = createClient()
-      const { data: technologies } = await supabase.from("technologies").select("name").in("id", selectedTechnologies)
-
-      setTechnologyNames(technologies?.map((tech) => tech.name) || [])
+      const response = await fetch('/api/admin/technologies')
+      const { technologies } = await response.json()
+      
+      const selectedTechNames = technologies
+        .filter((tech: any) => selectedTechnologies.includes(tech.id))
+        .map((tech: any) => tech.name)
+      
+      setTechnologyNames(selectedTechNames)
     } catch (error) {
       console.error("Error fetching technology names:", error)
     }

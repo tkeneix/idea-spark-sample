@@ -16,23 +16,29 @@ interface IdeaFirstFlowProps {
 
 export function IdeaFirstFlow({ onBack }: IdeaFirstFlowProps) {
   const [currentStep, setCurrentStep] = useState<Step>("themes")
-  const [selectedThemes, setSelectedThemes] = useState<number[]>([])
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([])
   const [ideaData, setIdeaData] = useState<{ title: string; content: string }>({ title: "", content: "" })
-  const [selectedTechnologies, setSelectedTechnologies] = useState<number[]>([])
+  const [selectedTechnologies, setSelectedTechnologies] = useState<string[]>([])
 
-  const handleThemeSelection = (themes: number[]) => {
+  const handleThemeSelection = (themes: string[]) => {
     setSelectedThemes(themes)
     setCurrentStep("idea")
+    // Scroll to top when navigating to next step
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleIdeaGeneration = (data: { title: string; content: string }) => {
     setIdeaData(data)
     setCurrentStep("technology")
+    // Scroll to top when navigating to next step
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleTechnologySelection = (technologies: number[]) => {
+  const handleTechnologySelection = (technologies: string[]) => {
     setSelectedTechnologies(technologies)
     setCurrentStep("pitch")
+    // Scroll to top when navigating to next step
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleBackToPath = () => {
@@ -45,6 +51,8 @@ export function IdeaFirstFlow({ onBack }: IdeaFirstFlowProps) {
     } else if (currentStep === "pitch") {
       setCurrentStep("technology")
     }
+    // Scroll to top when navigating back
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   return (

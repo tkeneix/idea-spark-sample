@@ -1,14 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@/lib/supabase/server"
+import { Database } from "@/lib/database"
 
 export async function GET() {
   try {
-    const supabase = await createServerClient()
-
-    const { data: settings } = await supabase
-      .from("admin_settings")
-      .select("key, value")
-      .in("key", ["recommendation_count"])
+    const settings = await Database.getSettingsByKeys(["recommendation_count"])
 
     const settingsMap =
       settings?.reduce(
@@ -31,16 +26,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const { recommendationCount } = await request.json()
-    const supabase = await createServerClient()
 
     // Upsert recommendation count setting
-    const { error } = await supabase.from("admin_settings").upsert({
-      key: "recommendation_count",
-      value: recommendationCount,
-      updated_at: new Date().toISOString(),
-    })
-
-    if (error) throw error
+    await Database.setSetting("recommendation_count", recommendationCount.toString())
 
     return NextResponse.json({ success: true })
   } catch (error) {

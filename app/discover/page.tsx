@@ -6,7 +6,6 @@ import { IdeasFilter } from "@/components/ideas-filter"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { createClient } from "@/lib/supabase/client"
 
 interface Idea {
   id: number
@@ -55,11 +54,12 @@ export default function DiscoverPage() {
   }, [filters])
 
   const fetchThemes = async () => {
-    const supabase = createClient()
     try {
-      const { data, error } = await supabase.from("business_themes").select("id, name").order("name")
-      if (error) throw error
-      setThemes(data || [])
+      const response = await fetch("/api/admin/themes")
+      if (response.ok) {
+        const data = await response.json()
+        setThemes(data.themes || [])
+      }
     } catch (error) {
       console.error("Error fetching themes:", error)
     }

@@ -1,25 +1,18 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { createServerClient } from "@/lib/supabase/server"
+import { Database } from "@/lib/database"
 
 export async function POST(request: NextRequest) {
   try {
     const { ideaData } = await request.json()
-    const supabase = await createServerClient()
 
-    const { data: settings } = await supabase
-      .from("admin_settings")
-      .select("value")
-      .eq("key", "recommendation_count")
-      .single()
+    // Get recommendation count setting
+    const setting = await Database.getSetting("recommendation_count")
+    const recommendationCount = setting?.value || 1
 
-    const recommendationCount = settings?.value || 1
-
-    // 利用可能な事業テーマを取得
-    const { data: themes, error } = await supabase.from("business_themes").select("*")
-
-    if (error) throw error
+    // Get available business themes
+    const themes = await Database.getThemes()
 
     const { text } = await generateText({
       model: openai("gpt-4o-mini"),

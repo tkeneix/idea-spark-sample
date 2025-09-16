@@ -1,17 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { generateText } from "ai"
 import { openai } from "@ai-sdk/openai"
-import { createServerClient } from "@/lib/supabase/server"
+import { Database } from "@/lib/database"
 
 export async function POST(request: NextRequest) {
   try {
     const { ideaData } = await request.json()
-    const supabase = await createServerClient()
 
-    // 利用可能な技術テーマを取得
-    const { data: technologies, error } = await supabase.from("technologies").select("*")
-
-    if (error) throw error
+    // Get available technologies
+    const technologies = await Database.getTechnologies()
 
     const { text } = await generateText({
       model: openai("gpt-4o-mini"),

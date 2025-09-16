@@ -15,14 +15,14 @@ export default function AdminPage() {
             <div className="flex items-center gap-4">
               <Settings className="h-8 w-8 text-primary" />
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Admin Panel</h1>
+                <h1 className="text-3xl font-bold text-foreground">管理ポータル</h1>
                 <p className="text-muted-foreground">Manage themes, technologies, and platform content</p>
               </div>
             </div>
             <Link href="/">
               <Button variant="outline" className="flex items-center gap-2 bg-transparent">
                 <ArrowLeft className="h-4 w-4" />
-                Back to Platform
+                Topへ戻る
               </Button>
             </Link>
           </div>

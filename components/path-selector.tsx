@@ -13,7 +13,7 @@ export function PathSelector({ onPathSelect }: PathSelectorProps) {
     <div className="space-y-6">
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-bold text-foreground">事業創造の出発点を選択</h2>
-        <p className="text-muted-foreground">リーンスタートアップ手法に基づいた2つのアプローチから選択してください</p>
+        <p className="text-muted-foreground">2つのアプローチから選択してください</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
@@ -73,7 +73,7 @@ export function PathSelector({ onPathSelect }: PathSelectorProps) {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span>AI発想支援でアプリケーション生成</span>
+                <span>AI発想支援でアイデア生成</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-primary rounded-full"></div>

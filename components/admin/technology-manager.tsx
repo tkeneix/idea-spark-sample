@@ -18,7 +18,7 @@ interface Technology {
   maturity_level?: string
   description: string
   use_cases?: string
-  performance_metrics?: string
+  performance_metrics?: string | object
   image_url?: string
   created_at: string
 }
@@ -163,7 +163,9 @@ export function TechnologyManager() {
       maturity_level: technology.maturity_level || "",
       description: technology.description,
       use_cases: technology.use_cases || "",
-      performance_metrics: technology.performance_metrics || "",
+      performance_metrics: typeof technology.performance_metrics === 'object' 
+        ? JSON.stringify(technology.performance_metrics, null, 2) 
+        : technology.performance_metrics || "",
       image_url: technology.image_url || "",
     })
   }
@@ -426,7 +428,11 @@ export function TechnologyManager() {
                     {tech.performance_metrics && (
                       <div>
                         <p className="text-xs font-medium text-muted-foreground">Performance:</p>
-                        <p className="text-xs text-muted-foreground">{tech.performance_metrics}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {typeof tech.performance_metrics === 'object' 
+                            ? JSON.stringify(tech.performance_metrics, null, 2) 
+                            : tech.performance_metrics}
+                        </p>
                       </div>
                     )}
                     <p className="text-xs text-muted-foreground">
